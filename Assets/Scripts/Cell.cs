@@ -6,52 +6,57 @@ public class Cell {
     private StringSet superposition;
     public string current;
 
+    public float entropy;
+
     public StringSet N;
     public StringSet S;
     public StringSet E;
     public StringSet W;
 
     public Cell(PrototypeCollection allStates) {
-        prototypes = allStates;
+        this.prototypes = allStates;
         Reset();
     }
 
     public StringSet getSuperposition() {
-        return new StringSet(superposition);
+        return new StringSet(this.superposition);
     }
 
     public bool CanBe(string key) {
-        return superposition.Contains(key);
+        return this.superposition.Contains(key);
     }
 
     public bool Intersect(StringSet other) {
-        bool changed = superposition.IntersectWith(other);
-        N.Clear();
-        S.Clear();
-        E.Clear();
-        W.Clear();
+        bool changed = this.superposition.IntersectWith(other);
+        this.N.Clear();
+        this.S.Clear();
+        this.E.Clear();
+        this.W.Clear();
 
         foreach (string possibility in superposition) {
             TilePrototype proto = prototypes[possibility];
-            N.UnionWith(proto.neighbor_pZ);
-            S.UnionWith(proto.neighbor_nZ);
-            E.UnionWith(proto.neighbor_pX);
-            W.UnionWith(proto.neighbor_nX);
+            this.N.UnionWith(proto.neighbor_pZ);
+            this.S.UnionWith(proto.neighbor_nZ);
+            this.E.UnionWith(proto.neighbor_pX);
+            this.W.UnionWith(proto.neighbor_nX);
         }
+
+        this.entropy = this.superposition.Count;
         
         return changed;
     }
 
     public bool isResolved() {
-        return superposition.Count == 0;
+        return this.superposition.Count == 0;
     }
 
     public void Reset() {
-        superposition = new StringSet(prototypes.Keys);
+        this.superposition.UnionWith(prototypes.Keys);
+        this.current = null;
     }
 
     public void Collapse() {
         int index = (int)Random.Range(0, superposition.Count);
-        current = superposition.ElementAt(index);
+        this.current = superposition.ElementAt(index);
     }
 }
