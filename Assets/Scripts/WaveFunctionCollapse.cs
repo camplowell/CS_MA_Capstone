@@ -39,7 +39,7 @@ public class WaveFunctionCollapse : MonoBehaviour
         TilePrototype toInstantiate = protos[collapsedCell.current];
         GameObject instantiated = Instantiate(objects[toInstantiate.objName]);
         instantiated.transform.position = new Vector3(2 * collapsed.x, 0, 2 * collapsed.z);
-        instantiated.transform.Rotate(new Vector3(0, -toInstantiate.rotation, 0));
+        instantiated.transform.Rotate(new Vector3(0, toInstantiate.rotation, 0));
         toProcess.Enqueue(collapsed);
         while (toProcess.Count > 0) {
             PropagateIteration(toProcess);
@@ -144,9 +144,9 @@ public sealed class Direction: IComparable<Direction> {
         this.z = z;
     }
     
-    public static readonly Direction N = new Direction(0, -1);
+    public static readonly Direction N = new Direction(0, 1);
     public static readonly Direction E = new Direction(1, 0);
-    public static readonly Direction S = new Direction(0, 1);
+    public static readonly Direction S = new Direction(0, -1);
     public static readonly Direction W = new Direction(-1, 0);
 
     public static readonly Direction[] Values = {N, E, S, W};

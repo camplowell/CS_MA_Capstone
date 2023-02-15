@@ -49,6 +49,12 @@ public class Cell {
     public void Collapse() {
         int index = (int)Random.Range(0, superposition.Count);
         this.current = superposition.ElementAt(index);
+
+        this.superposition.Clear();
+        this.superposition.Add(this.current);
+
+        UpdateNeighbors();
+        UpdateEntropy();
     }
 
     private void UpdateNeighbors() {
