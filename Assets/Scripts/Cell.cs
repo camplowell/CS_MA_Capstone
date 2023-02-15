@@ -8,12 +8,13 @@ public class Cell {
 
     public float entropy;
 
-    public StringSet N;
-    public StringSet S;
-    public StringSet E;
-    public StringSet W;
+    public StringSet N = new StringSet();
+    public StringSet S = new StringSet();
+    public StringSet E = new StringSet();
+    public StringSet W = new StringSet();
 
     public Cell(PrototypeCollection allStates) {
+        this.superposition = new StringSet();
         this.prototypes = allStates;
         Reset();
     }
@@ -28,6 +29,29 @@ public class Cell {
 
     public bool Intersect(StringSet other) {
         bool changed = this.superposition.IntersectWith(other);
+        UpdateEntropy();
+        UpdateNeighbors();
+        
+        return changed;
+    }
+
+    public bool isResolved() {
+        return this.current != null; //.Count == 0;
+    }
+
+    public void Reset() {
+        this.superposition.UnionWith(prototypes.Keys);
+        this.current = null;
+        UpdateEntropy();
+        UpdateNeighbors();
+    }
+
+    public void Collapse() {
+        int index = (int)Random.Range(0, superposition.Count);
+        this.current = superposition.ElementAt(index);
+    }
+
+    private void UpdateNeighbors() {
         this.N.Clear();
         this.S.Clear();
         this.E.Clear();
@@ -40,23 +64,9 @@ public class Cell {
             this.E.UnionWith(proto.neighbor_pX);
             this.W.UnionWith(proto.neighbor_nX);
         }
+    }
 
+    private void UpdateEntropy() {
         this.entropy = this.superposition.Count;
-        
-        return changed;
-    }
-
-    public bool isResolved() {
-        return this.superposition.Count == 0;
-    }
-
-    public void Reset() {
-        this.superposition.UnionWith(prototypes.Keys);
-        this.current = null;
-    }
-
-    public void Collapse() {
-        int index = (int)Random.Range(0, superposition.Count);
-        this.current = superposition.ElementAt(index);
     }
 }

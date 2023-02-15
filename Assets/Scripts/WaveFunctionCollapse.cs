@@ -14,40 +14,56 @@ public class WaveFunctionCollapse : MonoBehaviour
 
     private Queue<(int x, int z)> toProcess = new Queue<(int x, int z)>();
 
+    private bool done;
+
     private Cell[,] grid;
     // Start is called before the first frame update
     void Start()
     {
         GatherResources();
         InitializeGrid();
+        Debug.Log(this.protos);
+        Debug.Log(this.objects);
+        Debug.Log(this.grid);
+        done = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        toProcess.Enqueue(CollapseOne());
+        var collapsed = CollapseOne();
+        if (done) {
+            return;
+        }
+        Cell collapsedCell = grid[collapsed.x, collapsed.z];
+        TilePrototype toInstantiate = protos[collapsedCell.current];
+        GameObject instantiated = Instantiate(objects[toInstantiate.objName]);
+        instantiated.transform.position = new Vector3(2 * collapsed.x, 0, 2 * collapsed.z);
+        instantiated.transform.Rotate(new Vector3(0, -toInstantiate.rotation, 0));
+        toProcess.Enqueue(collapsed);
         while (toProcess.Count > 0) {
             PropagateIteration(toProcess);
         } 
     }
 
     void InitializeGrid() {
-        grid = new Cell[size_x, size_z];
+        this.grid = new Cell[size_x, size_z];
         for (int x = 0; x < size_x; x++) {
             for (int z = 0; z < size_z; z++) {
-                grid[x,z] = new Cell(protos);
+                this.grid[x,z] = new Cell(protos);
             }
         }
     }
 
     void GatherResources() {
-        TextAsset protoText = Resources.Load("Tiles/TileInfo.json") as TextAsset;
-        protos = JsonConvert.DeserializeObject<PrototypeCollection>(protoText.text);
+
+        TextAsset protoText = Resources.Load("Tiles/TileInfo") as TextAsset;
+        this.protos = JsonConvert.DeserializeObject<PrototypeCollection>(protoText.text);
 
         GameObject[] tileObjects = Resources.LoadAll<GameObject>("Tiles/");
-        objects = new Dictionary<string, GameObject>();
+        this.objects = new Dictionary<string, GameObject>();
         foreach (GameObject tile in tileObjects) {
-            objects.Add(tile.name, tile);
+            this.objects.Add(tile.name, tile);
         }
     }
 
@@ -91,11 +107,14 @@ public class WaveFunctionCollapse : MonoBehaviour
     }
 
     (int x, int z) CollapseOne() {
+        if (done) {
+            return (-1, -1);
+        }
         List<(int x, int z)> orderlyCells = new List<(int x, int z)>();
         float lowestEntropy = float.PositiveInfinity;
         for (int z = 0; z < size_z; z++) {
             for (int x = 0; x < size_x; x++) {
-                Cell cell = grid[x, z];
+                Cell cell = this.grid[x, z];
                 if (cell.isResolved() || cell.entropy > lowestEntropy) {
                     continue;
                 }
@@ -106,7 +125,13 @@ public class WaveFunctionCollapse : MonoBehaviour
                 orderlyCells.Add((x, z));
             }
         }
-        return orderlyCells[(int)UnityEngine.Random.Range(0.0f, orderlyCells.Count)];
+        if (orderlyCells.Count == 0) {
+            done = true;
+            return (-1, -1);
+        }
+        var toCollapse = orderlyCells[(int)UnityEngine.Random.Range(0.0f, orderlyCells.Count)];
+        grid[toCollapse.x, toCollapse.z].Collapse();
+        return toCollapse;
     }
 }
 
