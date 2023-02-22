@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5437526490403716410}
-  - component: {fileID: 5472843669448924169}
+  - component: {fileID: 8541928865935509815}
   m_Layer: 0
   m_Name: 1up
   m_TagString: Untagged
@@ -33,7 +33,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5472843669448924169
+--- !u!114 &8541928865935509815
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,13 +42,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 7309734501881251049}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7c88158abb0571ed9b92277f8aad7bc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1af080b3579560648b4b46079d385fb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zSocket: s_bottom
-  xSocket: b_slant
-  nzSocket: a_slant
-  nxSocket: s_bottom
+  weight: 1
+  nn:
+    biome: 0
+    height: 0
+  np:
+    biome: 0
+    height: 0
+  pn:
+    biome: 0
+    height: 1
+  pp:
+    biome: 0
+    height: 0
+  pZ: 
+  nX: 
+  nZ: 
+  pX: 
 --- !u!1001 &5860076246514736320
 PrefabInstance:
   m_ObjectHideFlags: 0

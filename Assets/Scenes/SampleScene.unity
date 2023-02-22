@@ -310,8 +310,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1830194067}
-  - component: {fileID: 1830194066}
   - component: {fileID: 1830194068}
+  - component: {fileID: 1830194069}
   m_Layer: 0
   m_Name: LevelGenerator
   m_TagString: Untagged
@@ -319,20 +319,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1830194066
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1830194065}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2bc4526a4bbf4d58a175ce80be36a1c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size_x: 10
-  size_z: 10
 --- !u!4 &1830194067
 Transform:
   m_ObjectHideFlags: 0
@@ -357,6 +343,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 1830194065}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63bbff4af722a6e08a14c688d4617774, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e2183abcac0582068ceb92a061edcfa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1830194069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830194065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2539ac99230c1e9d8174226c6ce53ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size_x: 10
+  size_z: 10
+  spacing: {x: 2, y: 1, z: 2}
