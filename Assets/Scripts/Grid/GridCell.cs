@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class GridCell {
-    private PrototypeDict prototypes;
+    public string current => _current;
+    public bool collapsed => _collapsed;
+    public float entropy => _entropy;
     public HashSet<string> superposition = new HashSet<string>();
+
+    private PrototypeDict prototypes;
     private HashSet<string> pZ = new HashSet<string>();
     private HashSet<string> nZ = new HashSet<string>();
     private HashSet<string> pX = new HashSet<string>();
@@ -12,24 +16,20 @@ public class GridCell {
     private string _current = null;
     private bool _collapsed = false;
 
-    public string current => _current;
-    public bool collapsed => _collapsed;
-    public float entropy => _entropy;
-
-    public GridCell(PrototypeDict prototypes) {
+    public GridCell(PrototypeDict prototypes, string current = null) {
         this.prototypes = prototypes;
-        Reset(true);
+        this._current = current;
+        Reset(false);
     }
 
     public void Collapse(string to) {
-        Debug.Assert(superposition.Contains(to));
         this.superposition.IntersectWith(new string[] {to});
         this._collapsed = true;
         this._current = to;
         Update();
     }
 
-    public void Collapse() {
+    public void Collapse(Random random) {
         List<float> cumulativeWeights = new List<float>();
         List<string> positions = new List<string>();
         float totalWeight = 0.0f;
@@ -42,7 +42,7 @@ public class GridCell {
             cumulativeWeights.Add(totalWeight);
         }
 
-        int choice = cumulativeWeights.BinarySearch(Random.Range(0.0f, totalWeight));
+        int choice = cumulativeWeights.BinarySearch((float)random.NextDouble() * totalWeight);
         if (choice < 0) {
             choice = ~choice;
         }

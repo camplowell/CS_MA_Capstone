@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Position {
     public readonly int x;
@@ -14,6 +15,12 @@ public class Position {
 
     public static Position operator +(Direction a, Position b)
         => b + a;
+
+    public float Distance(Position other) {
+        float dx = this.x - other.x;
+        float dz = this.z - other.z;
+        return Mathf.Sqrt(dx * dx + dz * dz);
+    }
 
     public static PositionRange Range(int size_x, int size_z) { return new Position.PositionRange(size_x, size_z); }
     public class PositionRange: IEnumerable<Position> {

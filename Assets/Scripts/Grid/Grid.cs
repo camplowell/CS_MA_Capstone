@@ -11,10 +11,17 @@ public class Grid {
         this.size_x = size_x;
         this.size_z = size_z;
         this.cells = new GridCell[size_x, size_z];
-        for (int x = 0; x < size_x; x++) {
-            for (int z = 0; z < size_z; z++) {
-                this.cells[x, z] = new GridCell(prototypes);
-            }
+        foreach (Position pos in Position.Range(size_x, size_z)) {
+            this[pos] = new GridCell(prototypes);
+        }
+    }
+
+    public Grid(Grid toCopy, PrototypeDict prototypes) {
+        this.size_x = toCopy.size_x;
+        this.size_z = toCopy.size_z;
+        this.cells = new GridCell[size_x, size_z];
+        foreach (Position pos in Position.Range(size_x, size_z)) {
+            this[pos] = new GridCell(prototypes, toCopy[pos].current);
         }
     }
 

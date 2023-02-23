@@ -1,5 +1,3 @@
-
-using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -11,7 +9,7 @@ public class GridSolver : MonoBehaviour
 
     private Grid grid;
     private GridView gridView;
-
+    private System.Random random;
     private bool done;
 
     void Start()
@@ -19,7 +17,8 @@ public class GridSolver : MonoBehaviour
         PrototypeDict prototypes = LoadPrototypes();
         this.grid = new Grid(size_x, size_z, prototypes);
         this.gridView = ScriptableObject.CreateInstance<GridView>();
-        this.gridView.Init(this.grid, this.spacing);
+        this.gridView.Init(size_x, size_z, this.spacing);
+        this.random = new System.Random();
         this.done = false;
     }
 
@@ -28,7 +27,7 @@ public class GridSolver : MonoBehaviour
         if (this.done) {
             return;
         }
-        Position collapsed = Collapser.Collapse(this.grid);
+        Position collapsed = Collapser.Collapse(this.grid, random);
         QueuePropagator.Propagate(this.grid, collapsed);
         this.gridView.Refresh(this.grid);
         this.done = this.grid.IsFullyCollapsed();

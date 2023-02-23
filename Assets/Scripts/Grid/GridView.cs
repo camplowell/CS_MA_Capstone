@@ -6,8 +6,8 @@ public class GridView: ScriptableObject {
     private Vector3 spacing;
     private Dictionary<string, GameObject> prefabs;
 
-    public void Init(Grid grid, Vector3 spacing, Dictionary<string, GameObject> prefabs = null) {
-        this.tileObjects = new (string name, GameObject obj)?[grid.size_x, grid.size_z];
+    public void Init(int size_x, int size_z, Vector3 spacing, Dictionary<string, GameObject> prefabs = null) {
+        this.tileObjects = new (string name, GameObject obj)?[size_x, size_z];
         this.spacing = spacing;
         if (this.prefabs == null) {
             this.prefabs = LoadPrefabs();
