@@ -9,11 +9,16 @@ public class Collapser {
     }
 
     private static void Collapse(GridCell cell, Random random, bool ignorePrev) {
-        if (cell.current != null && cell.superposition.Contains(cell.current) && !ignorePrev) {
+        if (
+            cell.current != null 
+            && cell.superposition.Contains(cell.current)
+            && !ignorePrev
+        ) {
             cell.Collapse(cell.current);
-        } else {
-            cell.Collapse(random);
+            return;
         }
+
+        cell.Collapse(random);
     }
 
     private static Position ChoosePosition(Grid grid, Random random) {
