@@ -61,7 +61,13 @@ public class ThreadedSolver : MonoBehaviour
         System.Random random = new System.Random();
         Position epicenter = null;
         do {
-            Position collapsed = Collapser.Collapse(grid, random, ignorePrev: epicenter == null);
+            Position collapsed;
+            if (epicenter == null) {
+                collapsed = Collapser.Collapse(grid, random, ignorePrev: true);
+                epicenter = collapsed;
+            } else {
+                collapsed = RadialCollapser.Collapse(grid, random, epicenter, ignorePrev: false);
+            }
             if (epicenter == null) {
                 epicenter = collapsed;
             }
