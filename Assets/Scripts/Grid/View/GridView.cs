@@ -10,7 +10,7 @@ public class GridView: ScriptableObject {
         this.tileObjects = new (string name, GameObject obj)?[size_x, size_z];
         this.spacing = spacing;
         if (this.prefabs == null) {
-            this.prefabs = LoadPrefabs();
+            this.prefabs = Loader.LoadPrefabs();
         } else {
             this.prefabs = prefabs;
         }
@@ -50,13 +50,5 @@ public class GridView: ScriptableObject {
 
     public void Refresh(Position pos, Grid grid) {
         Refresh(pos.x, pos.z, grid);
-    }
-
-    public static Dictionary<string, GameObject> LoadPrefabs() {
-        var prefabs = new Dictionary<string, GameObject>();
-        foreach (GameObject prefab in Resources.LoadAll<GameObject>("Tiles")) {
-            prefabs.Add(prefab.name, prefab);
-        }
-        return prefabs;
     }
 }

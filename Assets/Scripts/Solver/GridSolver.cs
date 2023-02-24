@@ -14,7 +14,7 @@ public class GridSolver : MonoBehaviour
 
     void Start()
     {
-        PrototypeDict prototypes = LoadPrototypes();
+        PrototypeDict prototypes = Loader.LoadPrototypes();
         this.grid = new Grid(size_x, size_z, prototypes);
         this.gridView = ScriptableObject.CreateInstance<GridView>();
         this.gridView.Init(size_x, size_z, this.spacing);
@@ -34,10 +34,5 @@ public class GridSolver : MonoBehaviour
         if (this.done) {
             Debug.Log("Done");
         }
-    }
-
-    private PrototypeDict LoadPrototypes() {
-        TextAsset protoText = Resources.Load<TextAsset>("Tiles/TilePrototypes");
-        return JsonConvert.DeserializeObject<PrototypeDict>(protoText.text);
     }
 }

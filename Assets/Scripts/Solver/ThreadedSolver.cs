@@ -13,16 +13,16 @@ public class ThreadedSolver : MonoBehaviour
 
     private PrototypeDict prototypes;
     private Grid grid;
-    private GridView gridView;
+    private PooledGridView gridView;
     private Task<(Grid grid, Position epicenter)> solver;
     private bool wasRunning = false;
     private float modifyCountdown = 0.0f;
 
     void Start()
     {
-        this.prototypes = LoadPrototypes();
+        this.prototypes = Loader.LoadPrototypes();
         this.grid = new Grid(size_x, size_z, prototypes);
-        this.gridView = ScriptableObject.CreateInstance<GridView>();
+        this.gridView = ScriptableObject.CreateInstance<PooledGridView>();
         this.gridView.Init(size_x, size_z, this.spacing);
         SolveAsync();
     }
@@ -39,12 +39,6 @@ public class ThreadedSolver : MonoBehaviour
         }
         this.modifyCountdown -= Time.deltaTime;
     }
-
-    public PrototypeDict LoadPrototypes() {
-        TextAsset protoText = Resources.Load<TextAsset>("Tiles/TilePrototypes");
-        return JsonConvert.DeserializeObject<PrototypeDict>(protoText.text);
-    }
-
     public void SolveAsync() {
         this.modifyCountdown = UnityEngine.Random.Range(modifyDelay_min, modifyDelay_max);
         this.solver = Task.Run<(Grid grid, Position epicenter)>(() => Solve(new Grid(this.grid, this.prototypes)));
