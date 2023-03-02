@@ -31,6 +31,12 @@ public class Grid {
         }
     }
 
+    public void Reset(Grid toCopy) {
+        foreach (Position pos in Position.Range(size_x, size_z)) {
+            this[pos] = new GridCell(toCopy[pos]);
+        }
+    }
+
     public List<Direction> GetValidDirections(Position pos) {
         List<Direction> validDirs = new List<Direction>();
         foreach (Direction dir in Direction.Values) {

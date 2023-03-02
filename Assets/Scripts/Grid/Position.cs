@@ -54,4 +54,13 @@ public class Position {
     {
         return "(" + this.x + ", " + this.z + ")";
     }
+
+    public override bool Equals(object obj)
+    {
+        if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+            return false;
+        }
+        Position pos = (Position) obj;
+        return this.x == pos.x && this.z == pos.z;
+    }
 }

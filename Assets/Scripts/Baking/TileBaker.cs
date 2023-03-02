@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class TileBaker : MonoBehaviour
 {
+    public int height = 2;
     public static string path = "Assets/Resources/Tiles/TilePrototypes.json";
     public void Bake() {
         var builders = InitializeBuilders();
@@ -14,9 +15,13 @@ public class TileBaker : MonoBehaviour
     private List<PrototypeBuilder> InitializeBuilders() {
         List<PrototypeBuilder> builders = new List<PrototypeBuilder>();
         foreach (GameObject tile in Resources.LoadAll<GameObject>("Tiles")) {
-            for (int rot = 0; rot < 360; rot += 90) {
-                var tileParams = tile.GetComponent<TileParams>();
-                builders.Add(new PrototypeBuilder(tileParams, tile.name, rot, 0));
+
+            var tileParams = tile.GetComponent<TileParams>();
+            int maxHeight = tileParams.getMaxHeight();
+            for(int elevation = 0; elevation < (height - maxHeight); elevation++) {
+                for (int rot = 0; rot < 360; rot += 90) {
+                    builders.Add(new PrototypeBuilder(tileParams, tile.name, rot, elevation));
+                }
             }
             Debug.Log("Initialized prototype builders: " + tile.name);
 

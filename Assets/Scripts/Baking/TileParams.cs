@@ -50,6 +50,14 @@ public class TileParams : MonoBehaviour
                 return this.pX;
         }
     }
+
+    public int getMaxHeight() {
+        return Mathf.Max(Mathf.Max(this.nn.height, this.np.height), Mathf.Max(this.pn.height, this.pp.height));
+    }
+
+    public int getMinHeight() {
+        return Mathf.Min(Mathf.Min(this.nn.height, this.np.height), Mathf.Min(this.pn.height, this.pp.height));
+    }
     
 }
 

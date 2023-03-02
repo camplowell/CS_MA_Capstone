@@ -22,6 +22,12 @@ public class GridCell {
         Reset(false);
     }
 
+    public GridCell(GridCell gridCell) {
+        this.prototypes = gridCell.prototypes;
+        this._current = current;
+        Reset(false);
+    }
+
     public void Collapse(string to) {
         this.superposition.IntersectWith(new string[] {to});
         this._collapsed = true;

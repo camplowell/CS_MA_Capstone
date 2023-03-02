@@ -18,6 +18,8 @@ public class AsyncSolver : MonoBehaviour
 
     private Task<Grid> modifyTask;
     private float countdown;
+    private bool wasRunning;
+    const int MAX_RETRIES = 4;
 
     void Start()
     {
@@ -27,26 +29,32 @@ public class AsyncSolver : MonoBehaviour
         this.gridView.Init(size_x, size_z, this.spacing);
         this.random = new System.Random();
 
-        this.modifyTask = Modify(0.0f);
+        _Modify();
     }
 
     void Update()
     {
         this.countdown -= Time.deltaTime;
-        if (this.modifyTask.IsCompleted) {
+        if (this.modifyTask.IsCompleted && this.wasRunning) {
             this.grid = modifyTask.Result;
 
             this.gridView.Refresh(this.grid);
-
-            this.modifyTask = Modify(countdown);
+            Invoke("_Modify", countdown);
         }
     }
 
-    public async Task<Grid> Modify(float initialDelay) {
-        await Task.Delay((int)(initialDelay * 1000));
+    private void _Modify() {
+
         this.countdown = UnityEngine.Random.Range(modifyDelay_min, modifyDelay_max);
+        this.modifyTask = Modify();
+    }
+
+    public async Task<Grid> Modify() {
+        this.wasRunning = true;
         Grid nextGrid = new Grid(this.grid, this.prototypes);
         Position epicenter = null;
+        int iterCount = 0;
+        int retryCount = 0;
         do {
             Position collapsed;
             if (epicenter == null) {
@@ -55,9 +63,17 @@ public class AsyncSolver : MonoBehaviour
             } else {
                 collapsed = RadialCollapser.Collapse(nextGrid, this.random, epicenter, ignorePrev: false);
             }
-            await AsyncPropagator.Propagate(nextGrid, collapsed);
+            if (!await AsyncPropagator.Propagate(nextGrid, collapsed)) {
+                retryCount++;
+                if (retryCount > MAX_RETRIES) {
+                    grid.Reset(clearCurrent: true);
+                } else {
+                    grid.Reset(this.grid);
+                }
+            }
+            iterCount++;
         } while (!nextGrid.IsFullyCollapsed());
-
-        return nextGrid;
+        Debug.Log("Finished with " + iterCount + " iterations and " + retryCount + " retries");
+        return nextGrid; 
     }
 }

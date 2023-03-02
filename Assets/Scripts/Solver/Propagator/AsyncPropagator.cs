@@ -14,7 +14,6 @@ public class AsyncPropagator
                 Position neighbor = here + dir;
                 grid[neighbor].Intersect(current.ValidNeighborValues(dir));
                 if (grid[neighbor].IsInvalid()) {
-                    grid.Reset(clearCurrent: true);
                     return false;
                 }
             }
