@@ -27,7 +27,7 @@ Varyings vert(Attributes IN) {
     OUT.worldPos = TransformObjectToWorld(IN.objPos.xyz);
     float3 worldPos = OUT.worldPos;
     worldPos -= lightDirectionWS * _ShadowBias.x;
-    worldPos += IN.normal * _ShadowBias.y;
+    worldPos += IN.normal.xyz * _ShadowBias.y;
     OUT.clipPos = TransformWorldToHClip(worldPos);
     OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
 

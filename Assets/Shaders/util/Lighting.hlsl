@@ -29,7 +29,8 @@ float4 MixLighting(MySurface surface, MyLightingData lighting) {
 BRDFData _InitializeBRDFData(inout MySurface surface) {
     half reflectivity = ReflectivitySpecular(surface.f0);
     half oneMinusReflectivity = half(1.0) - reflectivity;
-    half3 brdfDiffuse = half3(surface.albedo.rgb * (1.0 - surface.f0));
+    surface.albedo.rgb *= (1.0 - Max3(surface.f0.r, surface.f0.g, surface.f0.b));
+    half3 brdfDiffuse = surface.albedo.rgb;
     half3 brdfSpecular = half3(surface.f0);
     BRDFData brdfData;
     InitializeBRDFDataDirect(
@@ -47,7 +48,7 @@ BRDFData _InitializeBRDFData(inout MySurface surface) {
 
 void AddStylizedLight(
     Light light, MySurface surface, BRDFData brdfData, 
-    float3 normalWS, float3 viewDirectionWS,
+    float3 normalWS, float3 viewDirectionWS, float fresnelTerm,
     inout MyLightingData lighting, bool specularHighlightsOff
 ) {
     float attenuation = (light.distanceAttenuation * light.shadowAttenuation);
@@ -55,9 +56,9 @@ void AddStylizedLight(
     float NdotL = dot(light.direction, normalWS);
     float3 radiance = light.color * attenuation;
 
-    float3 radius = surface.lightWrap * surface.translucency;
+    float3 radius = surface.lightWrap * surface.lightWrap * surface.translucency;
     float3 scattering = SoftenSG(light.direction, radius, normalWS);
-    lighting.accent += radiance * scattering * surface.albedo.rgb;
+    lighting.accent += radiance * scattering * surface.albedo.rgb * (1 - fresnelTerm);
 
     radiance *= saturate(NdotL);
 
@@ -95,7 +96,7 @@ float4 UniversalFragmentStylized(InputData inputData, MySurface surface) {
     BRDFData brdfData = _InitializeBRDFData(surface);
     float NoV = dot(inputData.normalWS, inputData.viewDirectionWS);
     half3 reflectVector = reflect(-inputData.viewDirectionWS, inputData.normalWS);
-    half fresnelTerm = Pow4(1.0 - NoV);
+    half fresnelTerm = saturate(Pow4(1.0 - lerp(NoV, 1, surface.roughness)));
 
     half4 shadowMask = CalculateShadowMask(inputData);
     AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData.normalizedScreenSpaceUV, surface.ao);
@@ -114,7 +115,7 @@ float4 UniversalFragmentStylized(InputData inputData, MySurface surface) {
     if (IsMatchingLightLayer(mainLight.layerMask, meshRenderingLayers)) {
         AddStylizedLight(
             mainLight, surface, brdfData, 
-            inputData.normalWS, inputData.viewDirectionWS, 
+            inputData.normalWS, inputData.viewDirectionWS, fresnelTerm,
             lighting, false
         );
     }
@@ -133,7 +134,7 @@ float4 UniversalFragmentStylized(InputData inputData, MySurface surface) {
         {
             AddStylizedLight(
             light, surface, brdfData, 
-            inputData.normalWS, inputData.viewDirectionWS, 
+            inputData.normalWS, inputData.viewDirectionWS, fresnelTerm,
             lighting, false
         );
         }
@@ -147,7 +148,7 @@ float4 UniversalFragmentStylized(InputData inputData, MySurface surface) {
         {
             AddStylizedLight(
             light, surface, brdfData, 
-            inputData.normalWS, inputData.viewDirectionWS, 
+            inputData.normalWS, inputData.viewDirectionWS, fresnelTerm,
             lighting, false
         );
         }
