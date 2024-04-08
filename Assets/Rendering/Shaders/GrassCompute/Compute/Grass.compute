@@ -1,0 +1,124 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+#include "./Utils.hlsl"
+#include "./Input.hlsl"
+#include "./Noise.hlsl"
+
+float3 _Size;
+uint _Resolution;
+float _NormalSampleDist;
+
+Texture2D<float> _HeightMap;
+SamplerState sampler_HeightMap;
+float4 _HeightMap_TexelSize;
+
+Texture2D<float4> _MaskMap;
+SamplerState sampler_MaskMap;
+float4 _MaskMap_TexelSize;
+int _MaskChannel;
+float _Transition;
+
+Texture2D<float> _BlueNoiseMap;
+SamplerState sampler_BlueNoiseMap;
+float4 _BlueNoiseMap_TexelSize;
+
+float _Jitter;
+
+float _Length;
+float _LengthVariance;
+float _Width;
+float _WidthVariance;
+
+float3 GetPositionWS(float2 uv, float height) {
+    return Obj2World(
+        _Size * float3(uv.x - 0.5, height, uv.y - 0.5)
+    );
+}
+
+float3 GetPositionWS(float2 uv) {
+    return GetPositionWS(uv, _HeightMap.SampleLevel(sampler_HeightMap, uv, 0));
+}
+
+struct BladeProperties {
+    float3x3 tbnInverse;
+    float3x3 twistMat;
+    float width;
+    float length;
+};
+
+DrawVert MakeVertTS(float3 rootPosWS, float2 uv, BladeProperties blade) {
+    DrawVert vert;
+    float3 positionTS = float3(uv.x - 0.5, 0, uv.y);
+    positionTS.x *= blade.width;
+    positionTS.z *= blade.length;
+    float3x3 tangent2RWS = mul(blade.tbnInverse, blade.twistMat);
+    
+    vert.positionWS = rootPosWS + mul(tangent2RWS, positionTS);
+    vert.height = uv.y;
+
+    return vert;
+}
+
+float GetWeight(float2 uv) {
+    float4 weights = _MaskMap.SampleLevel(sampler_MaskMap, uv, 0);
+
+    float maxWeight = max(max(weights.x, weights.y), max(weights.z, weights.w));
+
+    weights = max(weights + _Transition - maxWeight, 0);
+    float totalWeight = weights.x + weights.y + weights.z + weights.w;
+    
+    return weights[_MaskChannel] / totalWeight; //max(0, weights[_MaskChannel] - threshold) / (1 - threshold);
+}
+
+[numthreads(256,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Resolution * _Resolution) return;
+    SetupRandom(id.x);
+
+    int2 bladeIndex = int2(id.x % _Resolution, id.x / _Resolution);
+    float2 jitter = float2(Random(), Random()) - 0.5;
+    float2 uv = (bladeIndex + 0.5 + _Jitter * jitter) / float2(_Resolution.xx);
+
+    float grassWeight = GetWeight(uv);
+    if (grassWeight == 0) return;
+
+    float threshold = SAMPLE_TEXEL(_BlueNoiseMap, bladeIndex);
+    if (grassWeight < threshold) return;
+
+    float3 rootPosWS = GetPositionWS(uv);
+    
+    float3 rightWS = GetPositionWS(uv + float2(1, 0) * _NormalSampleDist);
+    float3 upWS = GetPositionWS(uv + float2(0, 1) * _NormalSampleDist);
+
+    BladeProperties blade;
+    float3 normalWS;
+    CalculateNormalAndTS2WSMatrix(rootPosWS, upWS, rightWS, normalWS, blade.tbnInverse);
+    
+    blade.twistMat = AngleAxis3x3(Random(2 * PI), float3(0, 0, 1));
+    blade.length = _Length * (1 - Random(_LengthVariance));
+    blade.width = _Width * (1 - Random(_WidthVariance));
+
+    DrawVert verts[4];
+    
+    verts[0] = MakeVertTS(rootPosWS, float2(0.5, 0), blade);
+
+    verts[1] = MakeVertTS(rootPosWS, float2(0, 0.25), blade);
+
+    verts[2] = MakeVertTS(rootPosWS, float2(1, 0.5), blade);
+
+    verts[3] = MakeVertTS(rootPosWS, float2(0.5, 1), blade);
+
+    int numVerts = 0;
+
+    BeginOutput();
+
+    AppendTri(verts[0], verts[1], verts[2], normalWS);
+
+    AppendTri(verts[1], verts[2], verts[3], normalWS);
+
+    ApplyOutput();
+
+    // TODO: insert actual code here!
+}
